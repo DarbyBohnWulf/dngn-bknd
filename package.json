@@ -29,9 +29,13 @@
   },
   "homepage": "https://github.com/DarbyBohnWulf/dngn-bknd#readme",
   "dependencies": {
+    "apollo-server-express": "^2.9.12",
     "core-js": "^3.4.7",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "graphql": "^14.5.8",
+    "graphql-compose": "^7.6.1",
+    "graphql-compose-mongoose": "^7.3.0",
     "mongoose": "^5.7.13",
     "regenerator-runtime": "^0.13.3"
   },

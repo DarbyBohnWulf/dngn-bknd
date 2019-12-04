@@ -1,10 +1,8 @@
-import dotenv from 'dotenv';
-dotenv.config();
-console.log("ran config()\n", process.env.MONGO_URL)
+import { config } from 'dotenv';
+config();
 import mongoose from 'mongoose';
 
 const connectionUrl = process.env.MONGO_URL;
-console.log("mongo is at\n", connectionUrl);
 const connectionOpts = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
