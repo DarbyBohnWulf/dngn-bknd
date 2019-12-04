@@ -2,7 +2,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import express, { Request, Response } from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import gqlUser, * as User from './models/user';
+import gqlUser, * as User from './api/user';
 
 const app = express();
 
