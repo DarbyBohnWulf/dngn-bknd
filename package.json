@@ -4,6 +4,8 @@
   "description": "Backend for Dngn Bddy, a pnp rpg character creation companion",
   "main": "server.js",
   "scripts": {
+    "prestart": "gulp",
+    "start": "nodemon dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,7 +29,9 @@
   },
   "homepage": "https://github.com/DarbyBohnWulf/dngn-bknd#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "core-js": "^3.4.7",
+    "express": "^4.17.1",
+    "regenerator-runtime": "^0.13.3"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
