@@ -38,6 +38,14 @@ const UserSchema = new Schema({
   groups: [GroupSchema]
 });
 
-const User = mongoose.model('User', UserSchema);
+const AuthPayloadSchema = new Schema({
+  user: UserSchema,
+  token: String
+});
 
-export default User;
+const User = mongoose.model('User', UserSchema);
+const AuthPayload = mongoose.model('AuthPayload', AuthPayloadSchema);
+module.exports = {
+  AuthPayload: AuthPayload,
+  User: User
+}
