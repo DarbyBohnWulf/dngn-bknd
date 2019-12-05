@@ -1,7 +1,7 @@
 import { composeWithMongoose } from 'graphql-compose-mongoose/node8';
 import { schemaComposer, Mutation } from 'graphql-compose';
 import bcrypt from 'bcrypt';
-import * as fetch from 'node-fetch';
+import * as jwt from 'jsonwebtoken';
 import { User, AuthPayload } from '../models/user';
 
 const saltRounds = 10; // for bcrypt hashing
@@ -34,19 +34,33 @@ UserTC.addResolver({
   description: "a login function",
   kind: Mutation,
   resolve: async (rp) => {
+    let token = 'FAILURE';
     try {
       const user = await User.findById(rp.args.user_id);
+      console.log("this context\n", rp.context);
       console.log("this user\n", user);
       const match = await bcrypt.compare(rp.args.password, user.password);
       console.log("this match\n", match);
       if (match) {
-        return { user, token: "SUCCESS" }
+        delete user.password
+        const payload = {
+          username: user.username,
+          email: user.email,
+          id: user._id
+        };
+        token = jwt.sign(
+          payload,
+          process.env.JWT_SECRET,
+          {expiresIn: '7d'}
+        );
+        
+        return { user, token }
       } else {
-        return { user, token: "FAILURE" }
+        return { user, token }
       }
     } catch (err) {
       console.error("Login went WRONG\n",err);
-      return { user: {username: "fake"}, token: "FAILURE" }
+      return { user: {username: "fake"}, token }
     }
   }
 })
