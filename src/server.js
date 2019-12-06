@@ -2,20 +2,23 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import express, { Request, Response } from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import gqlUser, * as User from './api/user';
+import gqlSchema from './api/schema';
 import * as jwt from 'jsonwebtoken';
 
 const app = express();
 
 const gqlServer = new ApolloServer({
-  schema: User.default,
+  schema: gqlSchema,
   context: async ({ req, connection }) => {
     let authToken = null;
     let currentUser = null;
+    let verified = null;
 
     try {
-      authToken = req.headers["authorization"].split(' ')[1];
-      const verified = jwt.verify(authToken, process.env.JWT_SECRET);
+      if (authToken) {
+        authToken = req.headers["authorization"].split(' ')[1];
+        verified = jwt.verify(authToken, process.env.JWT_SECRET);
+      }
       if (verified) {
         currentUser = jwt.decode(authToken).id;
       }
