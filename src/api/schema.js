@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { User, AuthPayload } from '../models/user';
 import { Item, Weapon, Armor } from '../models/item';
+import { Race, Class, Character } from '../models/character';
+import Spell from '../models/spell';
 
 const saltRounds = 10; // for bcrypt hashing
 
@@ -15,15 +17,22 @@ const AuthPayloadTC = composeWithMongoose(AuthPayload);
 // this wrapper will handle password hashing for new users
 UserTC.wrapResolverResolve('createOne', next => async rp => {
   rp.beforeRecordMutate = async (doc, resolveParams) => {
-    doc.password = await bcrypt.hash(doc.password, saltRounds)
+    await bcrypt.hash(doc.password, saltRounds)
+      .then(p => doc.password = p)
+      .catch(console.error);
     return doc
   }
-  return next(rp);
+  return next(rp)
 });
 
+// use method with support for discriminators
 const ItemDTC = composeWithMongooseDiscriminators(Item);
 const ArmorTC = ItemDTC.discriminator(Armor);
 const WeaponTC = ItemDTC.discriminator(Weapon);
+const RaceTC = composeWithMongoose(Race);
+const ClassTC = composeWithMongoose(Class);
+const CharacterTC = composeWithMongoose(Character);
+const SpellTC = composeWithMongoose(Spell);
 
 // here is where we compose all the resolvers
 schemaComposer.Query.addFields({
@@ -36,6 +45,15 @@ schemaComposer.Query.addFields({
   armorList: ArmorTC.getResolver('findMany'),
   weaponPick: WeaponTC.getResolver('findById'),
   weaponList: WeaponTC.getResolver('findMany'),
+  race: RaceTC.getResolver('findOne'),
+  races: RaceTC.getResolver('findMany'),
+  raceById: RaceTC.getResolver('findById'),
+  class: ClassTC.getResolver('findOne'),
+  classes: ClassTC.getResolver('findMany'),
+  spell: SpellTC.getResolver('findOne'),
+  spells: SpellTC.getResolver('findMany'),
+  character: CharacterTC.getResolver('findOne'),
+  characters: CharacterTC.getResolver('findMany')
 });
 
 // this is a custom resolver for login
@@ -101,11 +119,33 @@ schemaComposer.Mutation.addFields({
   weaponUpdateMany: WeaponTC.getResolver('updateMany'),
   weaponRemoveById: WeaponTC.getResolver('removeById'),
   weaponRemoveMany: WeaponTC.getResolver('removeMany'),
+  spellAdd: SpellTC.getResolver('createOne'),
+  spellAddMany: SpellTC.getResolver('createMany'),
+  spellUpdate: SpellTC.getResolver('updateOne'),
+  spellUpdateMany: SpellTC.getResolver('updateMany'),
+  spellRemoveById: SpellTC.getResolver('removeById'),
+  spellRemoveMany: SpellTC.getResolver('removeMany'),
+  classAdd: ClassTC.getResolver('createOne'),
+  classAddMany: ClassTC.getResolver('createMany'),
+  classUpdate: ClassTC.getResolver('updateOne'),
+  classUpdateMany: ClassTC.getResolver('updateMany'),
+  classRemoveById: ClassTC.getResolver('removeById'),
+  classRemoveMany: ClassTC.getResolver('removeMany'),
+  raceAdd: RaceTC.getResolver('createOne'),
+  raceAddMany: RaceTC.getResolver('createMany'),
+  raceUpdate: RaceTC.getResolver('updateOne'),
+  raceUpdateMany: RaceTC.getResolver('updateMany'),
+  raceRemoveById: RaceTC.getResolver('removeById'),
+  raceRemoveMany: RaceTC.getResolver('removeMany'),
+  characterAdd: CharacterTC.getResolver('createOne'),
+  characterAddMany: CharacterTC.getResolver('createMany'),
+  characterUpdate: CharacterTC.getResolver('updateOne'),
+  characterUpdateMany: CharacterTC.getResolver('updateMany'),
+  characterRemoveById: CharacterTC.getResolver('removeById'),
+  characterRemoveMany: CharacterTC.getResolver('removeMany'),
 });
 
-
-
-
+// all the models come together to make one GraphQL schema
 const gqlSchema = schemaComposer.buildSchema();
 export default gqlSchema;
 
