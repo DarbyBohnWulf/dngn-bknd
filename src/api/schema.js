@@ -16,7 +16,7 @@ const AuthPayloadTC = composeWithMongoose(AuthPayload);
 
 // this wrapper will handle password hashing for new users
 UserTC.wrapResolverResolve('createOne', next => async rp => {
-  rp.beforeRecordMutate = async (doc, resolveParams) => {
+  rp.beforeRecordMutate = async (doc) => {
     await bcrypt.hash(doc.password, saltRounds)
       .then(p => doc.password = p)
       .catch(console.error);
@@ -38,6 +38,7 @@ const SpellTC = composeWithMongoose(Spell);
 schemaComposer.Query.addFields({
   userById: UserTC.getResolver('findById'),
   userByIds: UserTC.getResolver('findByIds'),
+  userOne: UserTC.getResolver('findOne'),
   userMany: UserTC.getResolver('findMany'),
   itemPick: ItemDTC.getResolver('findById'),
   itemList: ItemDTC.getResolver('findMany'),
@@ -59,14 +60,14 @@ schemaComposer.Query.addFields({
 // this is a custom resolver for login
 UserTC.addResolver({
   name: 'login',
-  args: { user_id: 'String!', password: 'String!' },
+  args: { email: 'String!', password: 'String!' },
   type: AuthPayloadTC,
   description: "a login function",
   kind: Mutation,
   resolve: async (rp) => {
     let token = 'FAILURE';
     try {
-      const user = await User.findById(rp.args.user_id);
+      const user = await User.findById(rp.args.email);
       // console.log("this context\n", rp.context);
       // console.log("this user\n", user);
       const match = await bcrypt.compare(rp.args.password, user.password);

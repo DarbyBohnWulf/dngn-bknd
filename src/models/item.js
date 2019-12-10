@@ -14,10 +14,12 @@ const ItemSchema = new Schema({
   },
   description: String,
   specialEffects: [String],
-  type: String
+  type: String,
+  price: Number
 });
 
 const ArmorSchema = new Schema({
+  armorCat: String,
   armorClass: Number,
   armorBonus: Number,
   stealthDisadvantage: {
@@ -32,6 +34,7 @@ const RollSchema = new Schema({
 });
 
 const WeaponSchema = new Schema({
+  weaponType: String,
   damageType: [{
     type: String,
     default: 'bludgeoning'
@@ -40,7 +43,8 @@ const WeaponSchema = new Schema({
   damageBonus: Number,
   properties: [String],
   rangeNormal: Number,
-  rangeLong: Number
+  rangeLong: Number,
+  simple: Boolean
 });
 
 ItemSchema.set('discriminatorKey', 'kind')
