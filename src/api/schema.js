@@ -23,6 +23,26 @@ const ClassTC = composeWithMongoose(Class);
 const CharacterTC = composeWithMongoose(Character);
 const SpellTC = composeWithMongoose(Spell);
 
+// this relation helps find the a user's friends naturally
+UserTC.addRelation(
+  'friends',
+  {
+    resolver: () => UserTC.getResolver('findByIds'),
+    prepareArgs: { // this is where you provide the args for this resolver
+      _ids: (source) => source.friends,
+    },
+    projection: { friends: 1 }, 
+  }
+);
+
+// // this relation is for groups
+// UserTC.addRelation(
+//   'groups',
+//   {
+//     resolver: () => UserTC.getResolver
+//   }
+// )
+
 // here is where we compose all the resolvers
 schemaComposer.Query.addFields({
   userById: UserTC.getResolver('findById'),
@@ -125,9 +145,23 @@ UserTC.addResolver({
   }
 });
 
+// this resolver is for adding a friend
+UserTC.addResolver({
+  name: 'addFriend',
+  type: UserTC,
+  args: { userId: 'MongoID!', newFriend: 'MongoID!' },
+  kind: Mutation ,
+  resolve: async ({ source, args, context, info }) => {
+    const user = await User.update({ _id: args.userId }, { $push: { friends: args.newFriend } })
+    if (!user) return null // or gracefully return an error etc...
+    return User.findById(args.userId) // return the record
+  }
+});
+
 schemaComposer.Mutation.addFields({
   userRegister: UserTC.getResolver('register'),
   userLogin: UserTC.getResolver('login'),
+  addFriend: UserTC.getResolver('addFriend'),
   userUpdateOne: UserTC.getResolver('updateOne'),
   userRemoveById: UserTC.getResolver('removeById'),
   userRemoveMany: UserTC.getResolver('removeMany'),
