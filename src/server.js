@@ -4,8 +4,15 @@ import express, { Request, Response } from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import gqlSchema from './api/schema';
 import * as jwt from 'jsonwebtoken';
+import cors from 'cors';
 
 const app = express();
+// const cors = cors();
+
+const gqlCORSOptions = {
+  origin: 'http://0.0.0.0:3000',
+  credentials: true,
+}
 
 const gqlServer = new ApolloServer({
   schema: gqlSchema,
@@ -30,9 +37,13 @@ const gqlServer = new ApolloServer({
   }
 });
 
-gqlServer.applyMiddleware({app});
+gqlServer.applyMiddleware({app, cors: gqlCORSOptions})
 
-app.get('/', async (req,res, next) => {
+app.use('/graphql', cors(gqlCORSOptions), async (req,res, next) => {
+  console.log("got a req\n",req);  
+});
+
+app.get('/', async (req,res) => {
   try {
     res.status(227).send('Gottem');
   } catch (err) {

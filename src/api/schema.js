@@ -14,17 +14,6 @@ const UserTC = composeWithMongoose(User);
 // and here is where we'll define a type to use in auth
 const AuthPayloadTC = composeWithMongoose(AuthPayload);
 
-// this wrapper will handle password hashing for new users
-UserTC.wrapResolverResolve('createOne', next => async rp => {
-  rp.beforeRecordMutate = async (doc) => {
-    await bcrypt.hash(doc.password, saltRounds)
-      .then(p => doc.password = p)
-      .catch(console.error);
-    return doc
-  }
-  return next(rp)
-});
-
 // use method with support for discriminators
 const ItemDTC = composeWithMongooseDiscriminators(Item);
 const ArmorTC = ItemDTC.discriminator(Armor);
@@ -57,6 +46,42 @@ schemaComposer.Query.addFields({
   characters: CharacterTC.getResolver('findMany')
 });
 
+// this is a better registration process
+UserTC.addResolver({
+  name: 'register',
+  args: { username: 'String', email: 'String!', password: 'String!' },
+  type: AuthPayloadTC,
+  description: "a resolver to register new users",
+  kind: Mutation,
+  resolve: async (rp) => {
+    rp.args.email = rp.args.email.toLowerCase();
+
+    try {
+      // check if someone's using provided email, and return early if so
+      if (await User.exists({ email: rp.args.email.toLowerCase() })){
+        return { token: 'That email is taken.' };
+      }
+      await bcrypt.hash(rp.args.password,saltRounds)
+        .then( hp => rp.args.password = hp);
+      const user = await User.create(rp.args);
+      const payload = {
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      }
+      const token = jwt.sign(
+        payload,
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return { user, token }
+    } catch(err) {
+      console.error("There was a problem during registration\n", err);
+      return { token: 'Something went wrong.' }
+    }
+  }
+});
+
 // this is a custom resolver for login
 UserTC.addResolver({
   name: 'login',
@@ -67,7 +92,7 @@ UserTC.addResolver({
   resolve: async (rp) => {
     let token = 'FAILURE';
     try {
-      const user = await User.findById(rp.args.email);
+      const user = await User.find(rp.args.email);
       // console.log("this context\n", rp.context);
       // console.log("this user\n", user);
       const match = await bcrypt.compare(rp.args.password, user.password);
@@ -97,7 +122,7 @@ UserTC.addResolver({
 });
 
 schemaComposer.Mutation.addFields({
-  userCreateOne: UserTC.getResolver('createOne'),
+  userRegister: UserTC.getResolver('register'),
   userLogin: UserTC.getResolver('login'),
   userUpdateOne: UserTC.getResolver('updateOne'),
   userRemoveById: UserTC.getResolver('removeById'),
