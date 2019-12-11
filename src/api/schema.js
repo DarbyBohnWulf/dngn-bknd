@@ -92,31 +92,35 @@ UserTC.addResolver({
   resolve: async (rp) => {
     let token = 'FAILURE';
     try {
-      const user = await User.find(rp.args.email);
-      // console.log("this context\n", rp.context);
-      // console.log("this user\n", user);
-      const match = await bcrypt.compare(rp.args.password, user.password);
-      // console.log("this match\n", match);
-      if (match) {
-        delete user.password
-        const payload = {
-          username: user.username,
-          email: user.email,
-          id: user._id
-        };
-        token = jwt.sign(
-          payload,
-          process.env.JWT_SECRET,
-          {expiresIn: '7d'}
-        );
-        
-        return { user, token }
-      } else {
-        return { user, token }
+      const users = await User.find({ email: rp.args.email });
+      if (users.length > 0) {
+        const user  = users[0]
+        // console.log("this context\n", rp.context);
+        // console.log("this user\n", user);
+        console.log("found user\n", user)
+        const match = await bcrypt.compare(rp.args.password, user.password);
+        // console.log("this match\n", match);
+        if (match) {
+          delete user.password
+          const payload = {
+            username: user.username,
+            email: user.email,
+            id: user._id
+          };
+          token = jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            {expiresIn: '7d'}
+          );
+          
+          return { user, token }
+        } else {
+          return { user, token }
+        }
       }
     } catch (err) {
       console.error("Login went WRONG\n",err);
-      return { user: {username: "fake"}, token }
+      return { token }
     }
   }
 });
