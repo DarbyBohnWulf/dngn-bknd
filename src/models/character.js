@@ -9,6 +9,9 @@ const VisionSchema = new Schema({
     ]
   },
   distance: Number
+},
+{
+  _id: false
 });
 
 const AbilityBonusSchema = new Schema({
@@ -17,6 +20,9 @@ const AbilityBonusSchema = new Schema({
     enum: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA', 'ANY']
   },
   amount: Number
+},
+{
+  _id: false
 });
 
 const RaceSchema = new Schema({
@@ -33,8 +39,14 @@ const RaceSchema = new Schema({
   vision: [VisionSchema],
   languages: [String],
   abilityBonuses: [AbilityBonusSchema],
+  skills: [String],
   traits: [String]
 });
+
+const CastingAbilitySchema = new Schema({
+  able: Boolean,
+  ability: String
+}, { _id: false }); 
 
 const ClassSchema = new Schema({
   name: String,
@@ -47,9 +59,10 @@ const ClassSchema = new Schema({
   weapon: [String],
   tool: [String],
   saves: [String],
-  skills: [String],
-  numberofSkills: Number,
-  startingEquipment: [Array],
+  skillSelection: [String],
+  numberOfSkills: Number,
+  spellcasting: CastingAbilitySchema,
+  startingEquipment: {},
   traits: [String]
 });
 

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 const TimeSchema = new Schema({
-  length: Number,
+  amount: Number,
   unit: {
     type: String,
     enum: [
@@ -18,6 +18,11 @@ const AreaSchema = new Schema({
     type: String,
     enum: ['foot', 'square'],
     default: 'square'
+  },
+  shape: {
+    type: String,
+    enum: ['cube', 'cone', 'sphere', 'cylinder'],
+    default: 'cylinder'
   }
 });
 
@@ -41,12 +46,6 @@ export const SpellSchema = new Schema({
     enum: ['other', 'self'],
     default: 'other'
   },
-  shape: {
-    type: String,
-    enum: ['cube', 'cone', 'sphere', 'cylinder'],
-    default: 'cylinder'
-  },
-  size: Number,
   range: Number,
   effects: [String],
   effectsAtHigherLevels: [String]

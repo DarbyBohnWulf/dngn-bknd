@@ -22,16 +22,18 @@ const ArmorSchema = new Schema({
   armorCat: String,
   armorClass: Number,
   armorBonus: Number,
+  strReq: Number,
   stealthDisadvantage: {
     type: Boolean,
     default: false
-  }
+  },
+  dexModifier: Boolean
 });
 
 const RollSchema = new Schema({
   amount: Number,
   sides: Number
-});
+}, { _id: false });
 
 const WeaponSchema = new Schema({
   weaponType: String,
