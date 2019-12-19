@@ -29,11 +29,22 @@ UserTC.addRelation(
   {
     resolver: () => UserTC.getResolver('findByIds'),
     prepareArgs: { // this is where you provide the args for this resolver
-      _ids: (source) => source.friends,
+      _ids: source => source.friends,
     },
     projection: { friends: 1 }, 
   }
 );
+
+UserTC.addRelation(
+  'characters',
+  {
+    resolver: () => CharacterTC.getResolver('findByIds'),
+    prepareArgs: {
+      _ids: source => source.characters
+    },
+    projection: { friends: 1},
+  }
+)
 
 // // this relation is for groups
 // UserTC.addRelation(
@@ -150,7 +161,7 @@ UserTC.addResolver({
   name: 'addFriend',
   type: UserTC,
   args: { userId: 'MongoID!', newFriend: 'MongoID!' },
-  kind: Mutation ,
+  kind: Mutation,
   resolve: async ({ source, args, context, info }) => {
     const user = await User.update({ _id: args.userId }, { $push: { friends: args.newFriend } })
     if (!user) return null // or gracefully return an error etc...

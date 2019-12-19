@@ -6,7 +6,7 @@ const TimeSchema = new Schema({
     type: String,
     enum: [
       'day', 'hour', 'minute', 'round', 'second', 'action', 'bonus_action',
-      'reaction', 'instantaneous'
+      'reaction', 'instantaneous', 'until_dispelled', 'special'
     ],
     default: 'action'
   }
@@ -14,17 +14,21 @@ const TimeSchema = new Schema({
 
 const AreaSchema = new Schema({
   amount: Number,
-  unit: {
-    type: String,
-    enum: ['foot', 'square'],
-    default: 'square'
-  },
+  casting: Number,
+  effect: Number,
   shape: {
     type: String,
     enum: ['cube', 'cone', 'sphere', 'cylinder'],
     default: 'cylinder'
   }
 });
+
+const ComponentsSchema = new Schema({
+  verbal: Boolean,
+  somatic: Boolean,
+  material: Boolean
+},
+{ _id: false });
 
 export const SpellSchema = new Schema({
   name: String,
@@ -37,6 +41,7 @@ export const SpellSchema = new Schema({
     required: true
   },
   level: Number,
+  components: ComponentsSchema,
   castingTime: TimeSchema,
   duration: TimeSchema,
   ritual: Boolean,

@@ -40,7 +40,8 @@ const RaceSchema = new Schema({
   languages: [String],
   abilityBonuses: [AbilityBonusSchema],
   skills: [String],
-  traits: [String]
+  traits: [String],
+  description: String,
 });
 
 const CastingAbilitySchema = new Schema({
@@ -63,7 +64,8 @@ const ClassSchema = new Schema({
   numberOfSkills: Number,
   spellcasting: CastingAbilitySchema,
   startingEquipment: {},
-  traits: [String]
+  traits: [String],
+  description: String,
 });
 
 
