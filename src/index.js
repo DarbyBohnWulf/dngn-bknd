@@ -1,7 +1,7 @@
 import './db/db';
 import app from './server';
 
-const PORT = 3080;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log('Server listening on port ' + PORT);

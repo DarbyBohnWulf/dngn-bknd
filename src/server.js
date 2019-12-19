@@ -1,6 +1,6 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import gqlSchema from './api/schema';
 import * as jwt from 'jsonwebtoken';
@@ -10,7 +10,7 @@ const app = express();
 // const cors = cors();
 
 const gqlCORSOptions = {
-  origin: 'http://0.0.0.0:3000',
+  origin: ['http://0.0.0.0:3000','https://dngn-frnt.herokuapp.com'],
   credentials: true,
 }
 
