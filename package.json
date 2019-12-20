@@ -6,7 +6,8 @@
   "scripts": {
     "build": "gulp",
     "start": "nodemon dist/index.js",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
