@@ -10,7 +10,9 @@ const app = express();
 // const cors = cors();
 
 const gqlCORSOptions = {
-  origin: ['http://0.0.0.0:3000','https://dngn-frnt.herokuapp.com'],
+  origin: [
+    'http://0.0.0.0:3000','https://dngn-frnt.herokuapp.com', 'http://dngn-frnt.herokuapp.com'
+  ],
   credentials: true,
 }
 
