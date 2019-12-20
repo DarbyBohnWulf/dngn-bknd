@@ -4,8 +4,7 @@
 ### What is it?
 
 DngnBddy is comprised of a Node.js powered Express/MongoDB+GraphQL
-[backend](https://github.com/DarbyBohnWulf/dngn-bknd) and a React.js 
-frontend that, together, assist users through the D&D 5E character 
+backend and a React.js [frontend](https://github.com/DarbyBohnWulf/dngn-frnt) that, together, assist users through the D&D 5E character 
 creation process. Trying new things can be scary, so bring a
 Bddy!:wink:
 
@@ -42,7 +41,12 @@ functions are returning and why.
 Oh, well. You can click the link at the top of this repo to be taken to
 a live version of the app running on Heroku and MongoDB Atlas. Or, if
 you want to hoard all the fun for yourself (or maybe share a merge),
-just clone (after forking, if you're feeling hackerish) this repo and 
-[dngn-bknd](https://github.com/DarbyBohnWulf/dngn-bknd), run a cool
-`npm i` followed by an `npm start` in 'dngn-bknd' and 'dngn-frnt' each,
-and you should be good to go.
+
+1.  just clone (after forking, if you're feeling hackerish) this repo and [dngn-frnt](https://github.com/DarbyBohnWulf/dngn-frnt)
+2.   Run a cool `npm i` in each folder.
+3.   Then you'll want to add some variables to your environment:
+     1.   PORT - what port your app runs on (I used 3080)
+     2.   MONGO_URL - the connection string to your mongodb instance
+     3.   JWT_SECRET - a random string to secure your secrets
+4.   Next, run an `npm start` in 'dngn-bknd' and 'dngn-frnt' each.
+5.   Then you should be good to go!
