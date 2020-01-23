@@ -5,13 +5,24 @@ import { ApolloServer } from 'apollo-server-express';
 import gqlSchema from './api/schema';
 import * as jwt from 'jsonwebtoken';
 import cors from 'cors';
+import session from 'express-session';
+import connectMongo from 'connect-mongo';
 
 const app = express();
-// const cors = cors();
+
+const MongoStore = connectMongo(session);
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  name: 'dngn.sid',
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ url: process.env.MONGO_URL })
+}));
 
 const gqlCORSOptions = {
   origin: [
-    'http://0.0.0.0:3000','https://dngn-frnt.herokuapp.com', 'http://dngn-frnt.herokuapp.com'
+    'http://0.0.0.0:3000', 'https://dngn-frnt.herokuapp.com', 'http://dngn-frnt.herokuapp.com'
   ],
   credentials: true,
 }
@@ -39,9 +50,9 @@ const gqlServer = new ApolloServer({
   }
 });
 
-gqlServer.applyMiddleware({app, cors: gqlCORSOptions})
+gqlServer.applyMiddleware({app, cors: gqlCORSOptions});
 
-app.use('/graphql', cors(gqlCORSOptions), async (req,res, next) => {
+app.use('/graphql', cors(gqlCORSOptions), async (req) => {
   console.log("got a req\n",req);  
 });
 
