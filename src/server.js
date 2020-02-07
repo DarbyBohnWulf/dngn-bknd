@@ -7,6 +7,7 @@ import * as jwt from 'jsonwebtoken';
 import cors from 'cors';
 import session from 'express-session';
 import connectMongo from 'connect-mongo';
+import authRouter from './api/auth';
 
 const app = express();
 
@@ -17,51 +18,56 @@ app.use(session({
   name: 'dngn.sid',
   resave: false,
   saveUninitialized: false,
-  store: new MongoStore({ url: process.env.MONGO_URL })
+  store: new MongoStore({ url: process.env.MONGO_URL }),
+  cookie: {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: process.env.NODE_ENV == 'production',
+    sameSite: true,
+    httpOnly: true,
+  }
 }));
 
 const gqlCORSOptions = {
   origin: [
-    'http://0.0.0.0:3000', 'https://dngn-frnt.herokuapp.com', 'http://dngn-frnt.herokuapp.com'
+    'http://localhost:3000', 'https://dngn-frnt.herokuapp.com', 'http://dngn-frnt.herokuapp.com'
   ],
   credentials: true,
 }
 
 const gqlServer = new ApolloServer({
   schema: gqlSchema,
-  context: async ({ req, connection }) => {
-    let authToken = null;
+  context: async ({ req }) => {
+    // let authToken = null;
     let currentUser = null;
     let verified = null;
 
+    const authToken = req.session.token || '';
     try {
       if (authToken) {
-        authToken = req.headers["authorization"].split(' ')[1];
-        verified = jwt.verify(authToken, process.env.JWT_SECRET);
+        verified = jwt.verify(authToken, process.env.JWT_SECRET) || false;
       }
       if (verified) {
-        currentUser = jwt.decode(authToken).id;
+        currentUser = verified.id;
       }
     } catch (err) {
       console.warn(`Couldn't authenticate with token: ${authToken}`, err);
     }
 
-    return { authToken, currentUser, connection }
+    return { ...req, currentUser, authToken }
   }
 });
 
-gqlServer.applyMiddleware({app, cors: gqlCORSOptions});
+app.use(cors(gqlCORSOptions));
 
-app.use('/graphql', cors(gqlCORSOptions), async (req) => {
-  console.log("got a req\n",req);  
-});
+gqlServer.applyMiddleware({app, cors: false});
 
-app.get('/', async (req,res) => {
-  try {
-    res.status(227).send('Gottem');
-  } catch (err) {
-    console.error("Couldn't get /\n", err);
-  }
-});
+// dev middleware to examine all requests
+// app.use('*', async (req,res, next) => {
+//   console.log('got a req with a token?\n', req.session.token);
+//   console.log("how about headers\n", req.headers);
+//   next();
+// });
+
+app.use('/auth', authRouter);
 
 export default app;
