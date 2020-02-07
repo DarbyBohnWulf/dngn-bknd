@@ -126,23 +126,21 @@ UserTC.addResolver({
       const users = await User.find({ email: rp.args.email });
       if (users.length > 0) {
         const user  = users[0]
-        // console.log("this context\n", rp.context);
-        // console.log("this user\n", user);
-        console.log("found user\n", user)
         const match = await bcrypt.compare(rp.args.password, user.password);
-        // console.log("this match\n", match);
         if (match) {
-          delete user.password
+          delete user.password;
           const payload = {
             username: user.username,
             email: user.email,
-            id: user._id
+            _id: user._id
           };
           token = jwt.sign(
             payload,
             process.env.JWT_SECRET,
             {expiresIn: '7d'}
           );
+
+          rp.context.session.token = token;
           
           return { user, token }
         } else {
@@ -162,7 +160,7 @@ UserTC.addResolver({
   type: UserTC,
   args: { userId: 'MongoID!', newFriend: 'MongoID!' },
   kind: Mutation,
-  resolve: async ({ source, args, context, info }) => {
+  resolve: async ({ args }) => {
     const user = await User.update({ _id: args.userId }, { $push: { friends: args.newFriend } })
     if (!user) return null // or gracefully return an error etc...
     return User.findById(args.userId) // return the record
