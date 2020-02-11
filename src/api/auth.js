@@ -19,7 +19,7 @@ authRouter.get('/', async (req, res) => {
   }
 });
 
-authRouter.post('/', async (req,res, next) => {
+authRouter.post('/', async (req, res) => {
   console.log("logging in\n", req.session);
   console.log("this is the body\n", req.body);
   console.log("or cookies\n", req.cookies);

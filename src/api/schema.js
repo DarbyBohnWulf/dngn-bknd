@@ -84,17 +84,17 @@ UserTC.addResolver({
   type: AuthPayloadTC,
   description: "a resolver to register new users",
   kind: Mutation,
-  resolve: async (rp) => {
-    rp.args.email = rp.args.email.toLowerCase();
+  resolve: async ({ args }) => {
+    args.email = args.email.toLowerCase();
 
     try {
       // check if someone's using provided email, and return early if so
-      if (await User.exists({ email: rp.args.email.toLowerCase() })){
+      if (await User.exists({ email: args.email.toLowerCase() })){
         return { token: 'That email is taken.' };
       }
-      await bcrypt.hash(rp.args.password,saltRounds)
-        .then( hp => rp.args.password = hp);
-      const user = await User.create(rp.args);
+      await bcrypt.hash(args.password,saltRounds)
+        .then( hp => args.password = hp);
+      const user = await User.create(args);
       const payload = {
         _id: user._id,
         username: user.username,
@@ -120,13 +120,13 @@ UserTC.addResolver({
   type: AuthPayloadTC,
   description: "a login function",
   kind: Mutation,
-  resolve: async (rp) => {
+  resolve: async ({ args, context }) => {
     let token = 'FAILURE';
     try {
-      const users = await User.find({ email: rp.args.email });
+      const users = await User.find({ email: args.email });
       if (users.length > 0) {
         const user  = users[0]
-        const match = await bcrypt.compare(rp.args.password, user.password);
+        const match = await bcrypt.compare(args.password, user.password);
         if (match) {
           delete user.password;
           const payload = {
@@ -140,7 +140,7 @@ UserTC.addResolver({
             {expiresIn: '7d'}
           );
 
-          rp.context.session.token = token;
+          context.session.token = token;
           
           return { user, token }
         } else {
