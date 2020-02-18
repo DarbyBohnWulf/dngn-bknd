@@ -47,7 +47,7 @@ const gqlServer = new ApolloServer({
         verified = jwt.verify(authToken, process.env.JWT_SECRET) || false;
       }
       if (verified) {
-        currentUser = verified.id;
+        currentUser = verified._id;
       }
     } catch (err) {
       console.warn(`Couldn't authenticate with token: ${authToken}`, err);
