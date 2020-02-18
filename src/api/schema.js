@@ -125,7 +125,7 @@ UserTC.addResolver({
     try {
       const users = await User.find({ email: args.email });
       if (users.length > 0) {
-        const user  = users[0]
+        const user  = users[0];
         const match = await bcrypt.compare(args.password, user.password);
         if (match) {
           delete user.password;
@@ -154,6 +154,25 @@ UserTC.addResolver({
   }
 });
 
+// this resolver logs you out and destroys your session
+UserTC.addResolver({
+  name: 'logout',
+  type: AuthPayloadTC,
+  args: {},
+  kind: Mutation,
+  resolve: async ({ context }) => {
+    try {
+      // destroy session and token to logout
+      context.session.destroy();
+      // return a nullish AuthPayload
+      return { user: { _id: '' }, token: '' }
+    } catch(err) {
+      console.error(err);
+      return { user: { _id: '' }, token: '' }
+    }
+  }
+});
+
 // this resolver is for adding a friend
 UserTC.addResolver({
   name: 'addFriend',
@@ -170,6 +189,7 @@ UserTC.addResolver({
 schemaComposer.Mutation.addFields({
   userRegister: UserTC.getResolver('register'),
   userLogin: UserTC.getResolver('login'),
+  userLogout: UserTC.getResolver('logout'),
   addFriend: UserTC.getResolver('addFriend'),
   userUpdateOne: UserTC.getResolver('updateOne'),
   userRemoveById: UserTC.getResolver('removeById'),
