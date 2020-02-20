@@ -180,8 +180,16 @@ UserTC.addResolver({
   args: { userId: 'MongoID!', newFriend: 'MongoID!' },
   kind: Mutation,
   resolve: async ({ args }) => {
-    const user = await User.update({ _id: args.userId }, { $push: { friends: args.newFriend } })
-    if (!user) return null // or gracefully return an error etc...
+    const user = await User.updateOne(
+      { _id: args.userId },
+      { $push: { friends: args.newFriend } }
+    );
+    const newFriend = await User.findById(args.newFriend);
+    if (!user || !newFriend) {
+      return null // or gracefully return an error etc...
+    } else {
+      newFriend.friends.push(args.userId);
+    }
     return User.findById(args.userId) // return the record
   }
 });
