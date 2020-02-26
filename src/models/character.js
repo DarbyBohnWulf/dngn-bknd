@@ -71,8 +71,14 @@ const ClassSchema = new Schema({
 
 const CharacterSchema = new Schema({
   name: String,
-  race: RaceSchema,
-  class: ClassSchema,
+  race: {
+    type: Schema.Types.ObjectId,
+    refs: 'Race'
+  },
+  class: {
+    type: Schema.Types.ObjectId,
+    refs: 'Class'
+  },
   abilities: {
     type: Map,
     of: Number
