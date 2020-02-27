@@ -13,7 +13,6 @@ const saltRounds = 10; // for bcrypt hashing
 const UserTC = composeWithMongoose(User);
 // and here is where we'll define a type to use in auth
 const AuthPayloadTC = composeWithMongoose(AuthPayload);
-
 // use method with support for discriminators
 const ItemDTC = composeWithMongooseDiscriminators(Item);
 const ArmorTC = ItemDTC.discriminator(Armor);
@@ -35,6 +34,7 @@ UserTC.addRelation(
   }
 );
 
+// this relation allows natural resolution of User's characters
 UserTC.addRelation(
   'characters',
   {
@@ -42,9 +42,29 @@ UserTC.addRelation(
     prepareArgs: {
       _ids: source => source.characters
     },
-    projection: { friends: 1},
   }
-)
+);
+
+// this relation is for retrieving info on a Character's race...
+CharacterTC.addRelation(
+  'race',
+  {
+    resolver: () => RaceTC.getResolver('findById'),
+    prepareArgs: {
+      _id: source => source.race
+    },
+  }
+);
+
+CharacterTC.addRelation(
+  'class',
+  {
+    resolver: () => ClassTC.getResolver('findById'),
+    prepareArgs: {
+      _id: source => source.class
+    },
+  }
+);
 
 // // this relation is for groups
 // UserTC.addRelation(
@@ -194,6 +214,24 @@ UserTC.addResolver({
   }
 });
 
+// this resolver will save a character to a User's roster
+UserTC.addResolver({
+  name: 'addCharacter',
+  type: UserTC,
+  kind: Mutation,
+  args: { userId: 'MongoID!', charId: 'MongoID!' },
+  resolve: async ({ args }) => {
+    const user = await User.updateOne(
+      { _id: args.userId },
+      { $push: { characters: args.charId } }
+    );
+
+    if (!user) return null // or return an error?
+
+    return User.findById(args.userId)
+  }
+});
+
 schemaComposer.Mutation.addFields({
   userRegister: UserTC.getResolver('register'),
   userLogin: UserTC.getResolver('login'),
@@ -202,6 +240,7 @@ schemaComposer.Mutation.addFields({
   userUpdateOne: UserTC.getResolver('updateOne'),
   userRemoveById: UserTC.getResolver('removeById'),
   userRemoveMany: UserTC.getResolver('removeMany'),
+  addCharacter: UserTC.getResolver('addCharacter'),
   itemAdd: ItemDTC.getResolver('createOne'),
   itemAddMany: ItemDTC.getResolver('createMany'),
   itemUpdate: ItemDTC.getResolver('updateOne'),
