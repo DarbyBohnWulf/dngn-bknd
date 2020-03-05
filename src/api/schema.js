@@ -1,5 +1,5 @@
 import { composeWithMongoose, composeWithMongooseDiscriminators } from 'graphql-compose-mongoose';
-import { schemaComposer, Mutation } from 'graphql-compose';
+import { schemaComposer, Mutation, Query } from 'graphql-compose';
 import bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { User, AuthPayload } from '../models/user';
@@ -96,6 +96,18 @@ schemaComposer.Query.addFields({
   character: CharacterTC.getResolver('findOne'),
   characters: CharacterTC.getResolver('findMany')
 });
+
+// a convenience resolver for info about yourself
+UserTC.addResolver({
+  name: 'me',
+  type: UserTC,
+  description: 'Get info about the currently logged in user.',
+  kind: Query,
+  resolve: async ({ context }) => {
+    const user = User.findById(context.currentUser);
+    return { user }
+  }
+})
 
 // this is a better registration process
 UserTC.addResolver({
