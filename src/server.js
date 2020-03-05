@@ -41,7 +41,7 @@ const gqlServer = new ApolloServer({
     let currentUser = null;
     let verified = null;
 
-    const authToken = req.session.token || '';
+    const authToken = req.headers.authorization.split()[1] || '';
     try {
       if (authToken) {
         verified = jwt.verify(authToken, process.env.JWT_SECRET) || false;
