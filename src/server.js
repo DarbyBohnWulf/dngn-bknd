@@ -41,10 +41,11 @@ const gqlServer = new ApolloServer({
     let currentUser = null;
     let verified = null;
 
-    const authToken = req.headers.authorization.split()[1] || '';
+    const authToken = req.headers.authorization || '';
     try {
       if (authToken) {
-        verified = jwt.verify(authToken, process.env.JWT_SECRET) || false;
+        const token = authToken.split(' ')[1];
+        verified = jwt.verify(token, process.env.JWT_SECRET) || false;
       }
       if (verified) {
         currentUser = verified._id;
