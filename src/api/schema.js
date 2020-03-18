@@ -74,6 +74,18 @@ CharacterTC.addRelation(
 //   }
 // )
 
+// a convenience resolver for info about yourself
+UserTC.addResolver({
+  name: 'me',
+  type: UserTC,
+  description: 'Get info about the currently logged in user.',
+  kind: Query,
+  resolve: async ({ context }) => {
+    const user = User.findById(context.currentUser);
+    return user
+  }
+})
+
 // here is where we compose all the resolvers
 schemaComposer.Query.addFields({
   userById: UserTC.getResolver('findById'),
@@ -94,20 +106,9 @@ schemaComposer.Query.addFields({
   spell: SpellTC.getResolver('findOne'),
   spells: SpellTC.getResolver('findMany'),
   character: CharacterTC.getResolver('findOne'),
-  characters: CharacterTC.getResolver('findMany')
+  characters: CharacterTC.getResolver('findMany'),
+  me: UserTC.getResolver('me'),
 });
-
-// a convenience resolver for info about yourself
-UserTC.addResolver({
-  name: 'me',
-  type: UserTC,
-  description: 'Get info about the currently logged in user.',
-  kind: Query,
-  resolve: async ({ context }) => {
-    const user = User.findById(context.currentUser);
-    return { user }
-  }
-})
 
 // this is a better registration process
 UserTC.addResolver({
