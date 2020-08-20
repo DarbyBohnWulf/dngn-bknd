@@ -31,7 +31,7 @@
   "homepage": "https://github.com/DarbyBohnWulf/dngn-bknd#readme",
   "dependencies": {
     "apollo-server-express": "^2.9.12",
-    "bcrypt": "^3.0.7",
+    "bcrypt": "^5.0.0",
     "connect-mongo": "^3.2.0",
     "core-js": "^3.4.7",
     "dotenv": "^8.2.0",
